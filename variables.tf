@@ -1,0 +1,76 @@
+variable "aws_region" {
+  description = "Região AWS"
+  type        = string
+  default     = "sa-east-1"
+}
+
+variable "project_name" {
+  description = "Prefixo de nomes dos recursos"
+  type        = string
+  default     = "tech-challenge"
+}
+
+variable "environment" {
+  description = "Ambiente (homolog | prod)"
+  type        = string
+  default     = "homolog"
+}
+
+variable "db_infra_state_bucket" {
+  description = "Bucket S3 do state do tech-challenge-db-infra"
+  type        = string
+}
+
+variable "db_infra_state_key" {
+  description = "Key do state do db-infra"
+  type        = string
+  default     = "db-infra/homolog/terraform.tfstate"
+}
+
+variable "db_infra_state_region" {
+  description = "Região do bucket de state do db-infra"
+  type        = string
+  default     = "sa-east-1"
+}
+
+variable "kubernetes_version" {
+  description = "Versão do Kubernetes no EKS"
+  type        = string
+  default     = "1.31"
+}
+
+variable "node_instance_types" {
+  description = "Tipos de instância do node group"
+  type        = list(string)
+  default     = ["t3.medium"]
+}
+
+variable "node_desired_size" {
+  description = "Quantidade desejada de nodes"
+  type        = number
+  default     = 2
+}
+
+variable "node_min_size" {
+  description = "Mínimo de nodes"
+  type        = number
+  default     = 1
+}
+
+variable "node_max_size" {
+  description = "Máximo de nodes (HPA do cluster)"
+  type        = number
+  default     = 4
+}
+
+variable "auth_lambda_invoke_arn" {
+  description = "Invoke ARN da Lambda de autenticação (preencher após o deploy do auth-lambda). Vazio = rota /auth ainda sem integração."
+  type        = string
+  default     = ""
+}
+
+variable "core_nlb_listener_arn" {
+  description = "ARN do listener NLB/ALB da aplicação core (VPC Link). Vazio = rota /core ainda sem integração."
+  type        = string
+  default     = ""
+}
