@@ -1,0 +1,17 @@
+aws_region   = "sa-east-1"
+project_name = "tech-challenge"
+environment  = "homolog"
+
+db_infra_state_bucket = "fiap-soat3-terraform-state"
+db_infra_state_key    = "db-infra/homolog/terraform.tfstate"
+db_infra_state_region = "sa-east-1"
+
+kubernetes_version  = "1.31"
+node_instance_types = ["t3.medium"]
+node_desired_size   = 2
+node_min_size       = 1
+node_max_size       = 4
+
+# Preencher após o deploy do auth-lambda e do NLB da app:
+# auth_lambda_invoke_arn = "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:.../invocations"
+# core_nlb_listener_arn  = "arn:aws:elasticloadbalancing:..."
