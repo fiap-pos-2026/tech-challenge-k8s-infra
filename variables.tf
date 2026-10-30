@@ -34,15 +34,17 @@ variable "db_infra_state_region" {
 }
 
 variable "eks_cluster_role_name" {
-  description = "IAM role existente do control plane EKS (Academy: LabEksClusterRole — CreateRole é negado no voclabs)"
+  description = "Pin opcional da IAM role do control plane. null = auto (LabEksClusterRole se existir, senão LabRole)."
   type        = string
-  default     = "LabEksClusterRole"
+  default     = null
+  nullable    = true
 }
 
 variable "eks_node_role_name" {
-  description = "IAM role existente dos worker nodes (Academy: LabEksNodeRole)"
+  description = "Pin opcional da IAM role dos nodes. null = auto (LabEksNodeRole se existir, senão LabRole)."
   type        = string
-  default     = "LabEksNodeRole"
+  default     = null
+  nullable    = true
 }
 
 variable "kubernetes_version" {
