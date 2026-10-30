@@ -15,7 +15,7 @@ Provisiona via **Terraform**:
 |---|---|
 | Nuvem | AWS (`us-east-1` no Academy Learner Lab) |
 | Kubernetes | EKS |
-| IAM (Academy) | Auto-detect `LabEksClusterRole`/`LabEksNodeRole` ou fallback `LabRole` (`voclabs` **não** cria IAM roles) |
+| IAM (Academy) | Auto-detect `*LabEksClusterRole*` / `*LabEksNodeRole*` (nomes com prefixo do lab) — `voclabs` **não** cria IAM roles |
 | Entrada | API Gateway HTTP API |
 | IaC | Terraform ≥ 1.6 |
 | Rede | VPC/subnets do remote state `db-infra` |
@@ -36,7 +36,7 @@ API Gateway ──► VPC Link / NLB ──► EKS (core)
 1. `tech-challenge-db-infra` já aplicado (VPC + RDS) com state remoto acessível.
 2. Conta AWS + Terraform ≥ 1.6.
 3. Bucket S3 + DynamoDB de lock (mesmo backend do db-infra, key diferente).
-4. **AWS Academy:** `voclabs` não cria IAM roles. O Terraform lista roles `Lab*` e prefere `LabEks*` quando existem; neste lab o fallback costuma ser `LabRole`. Confira em IAM → Roles. Renovar secrets CLI a cada Start Lab.
+4. **AWS Academy:** `voclabs` não cria IAM roles. As roles EKS já vêm no lab com prefixo (ex.: `c229085a...-LabEksClusterRole-...` / `...-LabEksNodeRole-...`). O Terraform resolve por regex; se falhar, pin o nome exato no tfvars. Renovar secrets CLI a cada Start Lab.
 
 ## Uso local
 

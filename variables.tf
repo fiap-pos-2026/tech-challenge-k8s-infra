@@ -34,14 +34,14 @@ variable "db_infra_state_region" {
 }
 
 variable "eks_cluster_role_name" {
-  description = "Pin opcional da IAM role do control plane. null = auto (LabEksClusterRole se existir, senão LabRole)."
+  description = "Pin opcional (nome exato). null = auto via regex *LabEksClusterRole* (Academy usa prefixo c229085a...-LabEksClusterRole-...)."
   type        = string
   default     = null
   nullable    = true
 }
 
 variable "eks_node_role_name" {
-  description = "Pin opcional da IAM role dos nodes. null = auto (LabEksNodeRole se existir, senão LabRole)."
+  description = "Pin opcional (nome exato). null = auto via regex *LabEksNodeRole*."
   type        = string
   default     = null
   nullable    = true

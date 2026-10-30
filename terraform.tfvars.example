@@ -7,9 +7,10 @@ db_infra_state_bucket = "fiap-soat3-terraform-state"
 db_infra_state_key    = "db-infra/homolog/terraform.tfstate"
 db_infra_state_region = "us-east-1"
 
-# Academy: voclabs nao permite CreateRole. null = auto-detect (LabEks* ou LabRole).
-# eks_cluster_role_name = "LabRole"
-# eks_node_role_name    = "LabRole"
+# Academy: voclabs nao permite CreateRole. null = auto (*LabEksClusterRole* / *LabEksNodeRole*).
+# Nomes reais no console costumam ter prefixo, ex.:
+# eks_cluster_role_name = "c229085a5771700l17999084t1w339712-LabEksClusterRole-6CFEhHi3QKHs"
+# eks_node_role_name    = "c229085a5771700l17999084t1w339712797-LabEksNodeRole-rqS942hke81e"
 
 kubernetes_version  = "1.31"
 node_instance_types = ["t3.medium"]
