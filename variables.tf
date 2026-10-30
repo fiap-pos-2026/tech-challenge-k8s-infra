@@ -1,7 +1,7 @@
 variable "aws_region" {
-  description = "Região AWS"
+  description = "Região AWS (Academy Learner Lab: us-east-1)"
   type        = string
-  default     = "sa-east-1"
+  default     = "us-east-1"
 }
 
 variable "project_name" {
@@ -28,9 +28,9 @@ variable "db_infra_state_key" {
 }
 
 variable "db_infra_state_region" {
-  description = "Região do bucket de state do db-infra"
+  description = "Região do bucket de state do db-infra (deve coincidir com AWS_REGION / Academy)"
   type        = string
-  default     = "sa-east-1"
+  default     = "us-east-1"
 }
 
 variable "kubernetes_version" {
