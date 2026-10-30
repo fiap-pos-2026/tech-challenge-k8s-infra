@@ -12,12 +12,13 @@ resource "aws_vpc_security_group_egress_rule" "eks_cluster_egress" {
   security_group_id = aws_security_group.eks_cluster.id
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
-  description       = "Egress liberado"
+  # SG rule descriptions: apenas ASCII (sem acentos) — InvalidParameterValue no EC2
+  description = "Allow all egress"
 }
 
 resource "aws_eks_cluster" "main" {
   name     = "${local.name_prefix}-eks"
-  role_arn = aws_iam_role.eks_cluster.arn
+  role_arn = local.eks_cluster_role_arn
   version  = var.kubernetes_version
 
   vpc_config {
@@ -28,10 +29,6 @@ resource "aws_eks_cluster" "main" {
   }
 
   enabled_cluster_log_types = ["api", "authenticator"]
-
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_policy,
-  ]
 
   tags = {
     Name = "${local.name_prefix}-eks"
@@ -53,21 +50,21 @@ resource "aws_vpc_security_group_ingress_rule" "nodes_from_cluster" {
   security_group_id            = aws_security_group.eks_nodes.id
   referenced_security_group_id = aws_security_group.eks_cluster.id
   ip_protocol                  = "-1"
-  description                  = "Tráfego do control plane"
+  description                  = "Traffic from control plane"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "nodes_from_nodes" {
   security_group_id            = aws_security_group.eks_nodes.id
   referenced_security_group_id = aws_security_group.eks_nodes.id
   ip_protocol                  = "-1"
-  description                  = "Comunicação entre nodes"
+  description                  = "Communication between nodes"
 }
 
 resource "aws_vpc_security_group_egress_rule" "nodes_egress" {
   security_group_id = aws_security_group.eks_nodes.id
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
-  description       = "Egress liberado"
+  description       = "Allow all egress"
 }
 
 # Libera PostgreSQL a partir dos nodes (RDS SG criado no db-infra)
@@ -77,13 +74,13 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_nodes" {
   ip_protocol                  = "tcp"
   from_port                    = 5432
   to_port                      = 5432
-  description                  = "PostgreSQL a partir dos nodes EKS"
+  description                  = "PostgreSQL from EKS nodes"
 }
 
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${local.name_prefix}-nodes"
-  node_role_arn   = aws_iam_role.eks_node.arn
+  node_role_arn   = local.eks_node_role_arn
   subnet_ids      = local.private_subnet_ids
   instance_types  = var.node_instance_types
 
@@ -101,12 +98,6 @@ resource "aws_eks_node_group" "main" {
     Environment = var.environment
     Project     = var.project_name
   }
-
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_worker_node,
-    aws_iam_role_policy_attachment.eks_cni,
-    aws_iam_role_policy_attachment.eks_ecr_readonly,
-  ]
 
   tags = {
     Name = "${local.name_prefix}-nodes"

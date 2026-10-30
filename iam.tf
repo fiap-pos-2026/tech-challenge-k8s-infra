@@ -1,51 +1,58 @@
-data "aws_iam_policy_document" "eks_cluster_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
+# AWS Academy (voclabs): iam:CreateRole é negado.
+# As roles EKS do lab vêm com prefixo aleatório, ex.:
+#   c229085a...-LabEksClusterRole-6CFEhHi3QKHs
+#   c229085a...-LabEksNodeRole-rqS942hke81e
+# Pin opcional via variáveis (nome exato).
 
-    principals {
-      type        = "Service"
-      identifiers = ["eks.amazonaws.com"]
-    }
+data "aws_iam_roles" "eks_cluster_candidates" {
+  name_regex = "(?i).*LabEksClusterRole.*"
+}
+
+data "aws_iam_roles" "eks_node_candidates" {
+  name_regex = "(?i).*LabEksNodeRole.*"
+}
+
+data "aws_iam_roles" "lab_role_fallback" {
+  name_regex = "(?i)^LabRole$"
+}
+
+locals {
+  cluster_candidates = sort(tolist(data.aws_iam_roles.eks_cluster_candidates.names))
+  node_candidates    = sort(tolist(data.aws_iam_roles.eks_node_candidates.names))
+  lab_role_names     = sort(tolist(data.aws_iam_roles.lab_role_fallback.names))
+
+  auto_cluster_role = try(local.cluster_candidates[0], try(local.lab_role_names[0], null))
+  auto_node_role    = try(local.node_candidates[0], try(local.lab_role_names[0], null))
+
+  eks_cluster_role_name = coalesce(var.eks_cluster_role_name, local.auto_cluster_role)
+  eks_node_role_name    = coalesce(var.eks_node_role_name, local.auto_node_role)
+}
+
+check "academy_lab_iam_roles" {
+  assert {
+    condition = (
+      local.eks_cluster_role_name != null &&
+      local.eks_node_role_name != null
+    )
+    error_message = <<-EOT
+      Nenhuma IAM role EKS do Academy encontrada.
+      Cluster candidates (*LabEksClusterRole*): [${join(", ", local.cluster_candidates)}]
+      Node candidates (*LabEksNodeRole*): [${join(", ", local.node_candidates)}]
+      LabRole: [${join(", ", local.lab_role_names)}]
+      Defina eks_cluster_role_name / eks_node_role_name com o nome exato do console.
+    EOT
   }
 }
 
-resource "aws_iam_role" "eks_cluster" {
-  name               = "${local.name_prefix}-eks-cluster"
-  assume_role_policy = data.aws_iam_policy_document.eks_cluster_assume.json
+data "aws_iam_role" "eks_cluster" {
+  name = local.eks_cluster_role_name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
-  role       = aws_iam_role.eks_cluster.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+data "aws_iam_role" "eks_node" {
+  name = local.eks_node_role_name
 }
 
-data "aws_iam_policy_document" "eks_node_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "eks_node" {
-  name               = "${local.name_prefix}-eks-node"
-  assume_role_policy = data.aws_iam_policy_document.eks_node_assume.json
-}
-
-resource "aws_iam_role_policy_attachment" "eks_worker_node" {
-  role       = aws_iam_role.eks_node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "eks_cni" {
-  role       = aws_iam_role.eks_node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-
-resource "aws_iam_role_policy_attachment" "eks_ecr_readonly" {
-  role       = aws_iam_role.eks_node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+locals {
+  eks_cluster_role_arn = data.aws_iam_role.eks_cluster.arn
+  eks_node_role_arn    = data.aws_iam_role.eks_node.arn
 }

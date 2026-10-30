@@ -33,6 +33,20 @@ variable "db_infra_state_region" {
   default     = "us-east-1"
 }
 
+variable "eks_cluster_role_name" {
+  description = "Pin opcional (nome exato). null = auto via regex *LabEksClusterRole* (Academy usa prefixo c229085a...-LabEksClusterRole-...)."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "eks_node_role_name" {
+  description = "Pin opcional (nome exato). null = auto via regex *LabEksNodeRole*."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "kubernetes_version" {
   description = "Versão do Kubernetes no EKS"
   type        = string

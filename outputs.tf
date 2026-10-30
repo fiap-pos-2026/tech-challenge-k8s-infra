@@ -1,3 +1,13 @@
+output "eks_cluster_role_name" {
+  description = "IAM role resolvida para o control plane (Academy auto-detect)"
+  value       = local.eks_cluster_role_name
+}
+
+output "eks_node_role_name" {
+  description = "IAM role resolvida para os nodes (Academy auto-detect)"
+  value       = local.eks_node_role_name
+}
+
 output "cluster_name" {
   description = "Nome do cluster EKS"
   value       = aws_eks_cluster.main.name
