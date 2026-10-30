@@ -33,6 +33,18 @@ variable "db_infra_state_region" {
   default     = "us-east-1"
 }
 
+variable "eks_cluster_role_name" {
+  description = "IAM role existente do control plane EKS (Academy: LabEksClusterRole — CreateRole é negado no voclabs)"
+  type        = string
+  default     = "LabEksClusterRole"
+}
+
+variable "eks_node_role_name" {
+  description = "IAM role existente dos worker nodes (Academy: LabEksNodeRole)"
+  type        = string
+  default     = "LabEksNodeRole"
+}
+
 variable "kubernetes_version" {
   description = "Versão do Kubernetes no EKS"
   type        = string

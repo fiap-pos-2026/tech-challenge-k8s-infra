@@ -13,8 +13,9 @@ Provisiona via **Terraform**:
 
 | Item | Escolha |
 |---|---|
-| Nuvem | AWS (`sa-east-1` por padrão) |
+| Nuvem | AWS (`us-east-1` no Academy Learner Lab) |
 | Kubernetes | EKS |
+| IAM (Academy) | Roles pré-criadas `LabEksClusterRole` / `LabEksNodeRole` (`voclabs` **não** cria IAM roles) |
 | Entrada | API Gateway HTTP API |
 | IaC | Terraform ≥ 1.6 |
 | Rede | VPC/subnets do remote state `db-infra` |
@@ -35,6 +36,7 @@ API Gateway ──► VPC Link / NLB ──► EKS (core)
 1. `tech-challenge-db-infra` já aplicado (VPC + RDS) com state remoto acessível.
 2. Conta AWS + Terraform ≥ 1.6.
 3. Bucket S3 + DynamoDB de lock (mesmo backend do db-infra, key diferente).
+4. **AWS Academy:** no console IAM/EKS confirme as roles `LabEksClusterRole` e `LabEksNodeRole` (não usar `LabRole` genérica para o cluster). Renovar secrets CLI a cada Start Lab.
 
 ## Uso local
 
@@ -51,7 +53,7 @@ terraform apply -var-file=terraform.tfvars
 Atualizar kubeconfig:
 
 ```bash
-aws eks update-kubeconfig --name <cluster_name> --region sa-east-1
+aws eks update-kubeconfig --name <cluster_name> --region us-east-1
 kubectl get nodes
 ```
 
@@ -59,9 +61,9 @@ kubectl get nodes
 
 ## CI/CD
 
-Workflow em `.github/workflows/terraform.yml`: `fmt` / `validate` / `plan` em PR; `apply` em `main` (environment homolog).
+Workflow em `.github/workflows/terraform.yml`: `fmt` / `validate` / `plan` em PR; `apply` em `main` (ou `workflow_dispatch` em `main`).
 
-Secrets: `AWS_ROLE_ARN`, `TF_STATE_BUCKET`, `TF_LOCK_TABLE`, e acesso de leitura ao state do `db-infra`.
+Secrets Academy: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, `TF_STATE_BUCKET`, `TF_LOCK_TABLE` (leitura do state do `db-infra`).
 
 ## Custos
 

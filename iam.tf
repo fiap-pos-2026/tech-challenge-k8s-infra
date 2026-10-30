@@ -1,51 +1,17 @@
-data "aws_iam_policy_document" "eks_cluster_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
+# AWS Academy Learner Lab (voclabs): iam:CreateRole é negado.
+# Usar roles pré-criadas do lab (console EKS → Cluster IAM role / Node role).
+# Conta própria: sobrescrever via TF_VAR_eks_cluster_role_name / TF_VAR_eks_node_role_name
+# com roles que você criar fora do lab.
 
-    principals {
-      type        = "Service"
-      identifiers = ["eks.amazonaws.com"]
-    }
-  }
+data "aws_iam_role" "eks_cluster" {
+  name = var.eks_cluster_role_name
 }
 
-resource "aws_iam_role" "eks_cluster" {
-  name               = "${local.name_prefix}-eks-cluster"
-  assume_role_policy = data.aws_iam_policy_document.eks_cluster_assume.json
+data "aws_iam_role" "eks_node" {
+  name = var.eks_node_role_name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
-  role       = aws_iam_role.eks_cluster.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-}
-
-data "aws_iam_policy_document" "eks_node_assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "eks_node" {
-  name               = "${local.name_prefix}-eks-node"
-  assume_role_policy = data.aws_iam_policy_document.eks_node_assume.json
-}
-
-resource "aws_iam_role_policy_attachment" "eks_worker_node" {
-  role       = aws_iam_role.eks_node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "eks_cni" {
-  role       = aws_iam_role.eks_node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-
-resource "aws_iam_role_policy_attachment" "eks_ecr_readonly" {
-  role       = aws_iam_role.eks_node.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+locals {
+  eks_cluster_role_arn = data.aws_iam_role.eks_cluster.arn
+  eks_node_role_arn    = data.aws_iam_role.eks_node.arn
 }
