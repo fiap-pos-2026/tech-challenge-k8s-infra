@@ -1,10 +1,11 @@
-aws_region   = "sa-east-1"
+# AWS Academy Learner Lab: use us-east-1. Conta própria pode usar sa-east-1.
+aws_region   = "us-east-1"
 project_name = "tech-challenge"
 environment  = "homolog"
 
 db_infra_state_bucket = "fiap-soat3-terraform-state"
 db_infra_state_key    = "db-infra/homolog/terraform.tfstate"
-db_infra_state_region = "sa-east-1"
+db_infra_state_region = "us-east-1"
 
 kubernetes_version  = "1.31"
 node_instance_types = ["t3.medium"]
