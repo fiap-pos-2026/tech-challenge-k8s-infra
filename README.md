@@ -1,70 +1,73 @@
 # tech-challenge-k8s-infra
 
-Infraestrutura como código do **cluster Kubernetes** e da **entrada HTTP** da Fase 3 (The Java Garage).
+Terraform do cluster Kubernetes e da porta de entrada HTTP da oficina.
 
-Provisiona via **Terraform**:
+O que sobe aqui:
 
-- Cluster **Amazon EKS** (control plane + node group)
-- Integração com a VPC criada em `tech-challenge-db-infra` (remote state)
-- Security groups liberando tráfego dos nodes para o RDS
-- Base de **API Gateway HTTP API** (rotas para a app e para a Lambda de auth)
+- Amazon EKS (control plane + node group)
+- Security groups (incluindo liberação dos nodes para o Postgres na 5432)
+- API Gateway HTTP API (depois ligamos `/auth` na Lambda e `/core` na app)
 
-## Stack
-
-| Item | Escolha |
-|---|---|
-| Nuvem | AWS (`us-east-1` no Academy Learner Lab) |
-| Kubernetes | EKS |
-| IAM (Academy) | Auto-detect `*LabEksClusterRole*` / `*LabEksNodeRole*` (nomes com prefixo do lab) — `voclabs` **não** cria IAM roles |
-| Entrada | API Gateway HTTP API |
-| IaC | Terraform ≥ 1.6 |
-| Rede | VPC/subnets do remote state `db-infra` |
-
-Repositórios irmãos: [core](https://github.com/fiap-pos-2026/tech-challenge-core) · [db-infra](https://github.com/fiap-pos-2026/tech-challenge-db-infra) · [auth-lambda](https://github.com/fiap-pos-2026/tech-challenge-auth-lambda)
+A VPC e o RDS vêm do [tech-challenge-db-infra](https://github.com/fiap-pos-2026/tech-challenge-db-infra) via remote state. A app está em [tech-challenge-core](https://github.com/fiap-pos-2026/tech-challenge-core); a auth serverless em [tech-challenge-auth-lambda](https://github.com/fiap-pos-2026/tech-challenge-auth-lambda).
 
 ```text
 Internet
    │
    ▼
-API Gateway ──► VPC Link / NLB ──► EKS (core)
+API Gateway ──► app no EKS
    │
-   └──► Lambda (auth CPF)  [tech-challenge-auth-lambda]
+   └──► Lambda (login por CPF)
 ```
 
-## Pré-requisitos
+## Stack
 
-1. `tech-challenge-db-infra` já aplicado (VPC + RDS) com state remoto acessível.
-2. Conta AWS + Terraform ≥ 1.6.
-3. Bucket S3 + DynamoDB de lock (mesmo backend do db-infra, key diferente).
-4. **AWS Academy:** `voclabs` não cria IAM roles. As roles EKS já vêm no lab com prefixo (ex.: `c229085a...-LabEksClusterRole-...` / `...-LabEksNodeRole-...`). O Terraform resolve por regex; se falhar, pin o nome exato no tfvars. Renovar secrets CLI a cada Start Lab.
+| Item | Valor |
+|---|---|
+| Nuvem | AWS (`us-east-1` no lab da FIAP) |
+| Cluster | EKS |
+| IAM no lab | roles prontas `*LabEksClusterRole*` / `*LabEksNodeRole*` (não criamos role no Terraform) |
+| Entrada | API Gateway HTTP API |
+| IaC | Terraform ≥ 1.6 |
 
-## Uso local
+No lab, `iam:CreateRole` é bloqueado. O código procura as roles EKS que a academia já deixa na conta; se precisar, você fixa o nome exato no tfvars.
+
+## Outputs
+
+Repositório público: **não** versionamos endpoint do EKS, URL do Gateway, IDs de security group nem nomes longos de role.
+
+```bash
+terraform output
+```
+
+Para o kubectl (com o lab ativo):
+
+```bash
+aws eks update-kubeconfig --name "$(terraform output -raw cluster_name)" --region us-east-1
+kubectl get nodes
+```
+
+## Como rodar local
+
+1. `db-infra` já aplicado e state acessível.
+2. Preencha bucket/tabela e aponte o remote state do banco:
 
 ```bash
 cp terraform.tfvars.example terraform.tfvars
 cp backend.hcl.example backend.hcl
-# edite bucket / tabela / region e o path do remote state do db-infra
-
 terraform init -backend-config=backend.hcl
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
 
-Atualizar kubeconfig:
+Não commite `terraform.tfvars`, `backend.hcl` nem state.
 
-```bash
-aws eks update-kubeconfig --name <cluster_name> --region us-east-1
-kubectl get nodes
-```
+## CI
 
-**Não commitar** `terraform.tfvars`, `backend.hcl` nem `*.tfstate`.
+PR: fmt, validate, plan.  
+`main` (ou `workflow_dispatch`): apply em homolog.
 
-## CI/CD
+Secrets: access key, secret, session token, bucket e tabela de lock.
 
-Workflow em `.github/workflows/terraform.yml`: `fmt` / `validate` / `plan` em PR; `apply` em `main` (ou `workflow_dispatch` em `main`).
+## Custo
 
-Secrets Academy: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, `TF_STATE_BUCKET`, `TF_LOCK_TABLE` (leitura do state do `db-infra`).
-
-## Custos
-
-EKS control plane (~US$ 0,10/h), nodes EC2 e NAT (já no db-infra) consomem créditos. Use `terraform destroy` fora de demos e configure **AWS Budgets**.
+EKS control plane e os nodes pesam bastante, somados ao NAT do `db-infra`. Fora de uso, destrua **este** stack primeiro e o `db-infra` depois. Confira o crédito no portal do lab.
