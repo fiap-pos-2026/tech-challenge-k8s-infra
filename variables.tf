@@ -34,7 +34,7 @@ variable "db_infra_state_region" {
 }
 
 variable "eks_cluster_role_name" {
-  description = "Pin opcional (nome exato). null = auto via regex *LabEksClusterRole* (Academy usa prefixo c229085a...-LabEksClusterRole-...)."
+  description = "Pin opcional (nome exato no IAM). null = auto via regex *LabEksClusterRole*."
   type        = string
   default     = null
   nullable    = true

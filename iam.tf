@@ -1,8 +1,6 @@
-# AWS Academy (voclabs): iam:CreateRole é negado.
-# As roles EKS do lab vêm com prefixo aleatório, ex.:
-#   c229085a...-LabEksClusterRole-6CFEhHi3QKHs
-#   c229085a...-LabEksNodeRole-rqS942hke81e
-# Pin opcional via variáveis (nome exato).
+# AWS Academy (voclabs): iam:CreateRole e negado.
+# Roles EKS do lab costumam vir com prefixo aleatorio + LabEksClusterRole / LabEksNodeRole.
+# Pin opcional via variaveis (nome exato do console).
 
 data "aws_iam_roles" "eks_cluster_candidates" {
   name_regex = "(?i).*LabEksClusterRole.*"
