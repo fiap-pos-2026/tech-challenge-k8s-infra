@@ -125,7 +125,8 @@ data "aws_lbs" "core" {
 data "aws_lb_listener" "core" {
   count = var.core_nlb_listener_arn == "" && length(data.aws_lbs.core.arns) > 0 ? 1 : 0
 
-  load_balancer_arn = data.aws_lbs.core.arns[0]
+  # aws_lbs.arns é set — precisa tolist para indexar
+  load_balancer_arn = tolist(data.aws_lbs.core.arns)[0]
   port              = var.core_nlb_listener_port
 }
 
