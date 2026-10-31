@@ -49,6 +49,16 @@ output "api_gateway_endpoint" {
   value       = aws_apigatewayv2_api.http.api_endpoint
 }
 
+output "core_gateway_route_enabled" {
+  description = "true quando ANY /core está ligado ao NLB via VPC Link"
+  value       = local.core_route_enabled
+}
+
+output "vpc_link_id" {
+  description = "ID do VPC Link usado pela integração /core"
+  value       = aws_apigatewayv2_vpc_link.core.id
+}
+
 output "configure_kubectl" {
   description = "Comando para configurar o kubeconfig"
   value       = "aws eks update-kubeconfig --name ${aws_eks_cluster.main.name} --region ${var.aws_region}"

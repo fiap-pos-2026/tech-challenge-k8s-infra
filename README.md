@@ -6,7 +6,8 @@ O que sobe aqui:
 
 - Amazon EKS (control plane + node group)
 - Security groups (incluindo liberação dos nodes para o Postgres na 5432)
-- API Gateway HTTP API (depois ligamos `/auth` na Lambda e `/core` na app)
+- API Gateway HTTP API + VPC Link para `/core` (NLB interno do Service no EKS)
+- `/auth` fica no Terraform do auth-lambda (não preencha `auth_lambda_invoke_arn` aqui)
 
 A VPC e o RDS vêm do [tech-challenge-db-infra](https://github.com/fiap-pos-2026/tech-challenge-db-infra) via remote state. A app está em [tech-challenge-core](https://github.com/fiap-pos-2026/tech-challenge-core); a auth serverless em [tech-challenge-auth-lambda](https://github.com/fiap-pos-2026/tech-challenge-auth-lambda).
 
@@ -61,13 +62,21 @@ terraform apply -var-file=terraform.tfvars
 
 Não commite `terraform.tfvars`, `backend.hcl` nem state.
 
+## Rota `/core` (NLB + VPC Link)
+
+1. Apply deste repo (sobe EKS, HTTP API e VPC Link; a rota `/core` só aparece se o NLB já existir).
+2. Deploy do `tech-challenge-core` no overlay `homolog` (Service `LoadBalancer` → NLB interno).
+3. **Re-apply** deste repo (`workflow_dispatch` ou push em `main`) para o discovery achar o NLB e criar `ANY /core` + `ANY /core/{proxy+}`.
+
+Override opcional: `TF_VAR_core_nlb_listener_arn` com o ARN do listener TCP.
+
 ## CI
 
 PR: fmt, validate, plan.  
-`main` (ou `workflow_dispatch`): apply em homolog.
+`main` (ou `workflow_dispatch`): apply em homolog (Plan **não** roda no dispatch — evita disputa de lock com o Apply).
 
 Secrets: access key, secret, session token, bucket e tabela de lock.
 
 ## Custo
 
-EKS control plane e os nodes pesam bastante, somados ao NAT do `db-infra`. Fora de uso, destrua **este** stack primeiro e o `db-infra` depois. Confira o crédito no portal do lab.
+EKS control plane e os nodes pesam bastante, somados ao NAT do `db-infra`. Fora de uso: destrua a Lambda de auth e o NLB do core (ou o Service), depois **este** stack, e por último o `db-infra` — senão ENIs prendem as subnets privadas. Confira o crédito no portal do lab.
