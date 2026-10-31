@@ -11,14 +11,41 @@ O que sobe aqui:
 
 A VPC e o RDS vêm do [tech-challenge-db-infra](https://github.com/fiap-pos-2026/tech-challenge-db-infra) via remote state. A app está em [tech-challenge-core](https://github.com/fiap-pos-2026/tech-challenge-core); a auth serverless em [tech-challenge-auth-lambda](https://github.com/fiap-pos-2026/tech-challenge-auth-lambda).
 
-```text
-Internet
-   │
-   ▼
-API Gateway ──► app no EKS
-   │
-   └──► Lambda (login por CPF)
+```mermaid
+flowchart LR
+  Internet(("Internet"))
+
+  subgraph thisrepo["este repositório"]
+    GW["API Gateway HTTP API<br/>stage $default + access log"]
+    VPCL["VPC Link<br/>(SG próprio)"]
+    subgraph eks["EKS"]
+      CP["Control plane<br/>(roles LabEks*)"]
+      NG["Node group<br/>t3.medium · 1–4 nodes"]
+    end
+  end
+
+  subgraph auth["tech-challenge-auth-lambda"]
+    L["Lambda CPF → JWT"]
+  end
+  subgraph core["tech-challenge-core"]
+    NLB["NLB interno<br/>(Service LoadBalancer)"]
+    Pods["pods core (HPA)"]
+  end
+  subgraph db["tech-challenge-db-infra"]
+    VPC["VPC + subnets"]
+    RDS[("RDS PostgreSQL")]
+  end
+
+  Internet --> GW
+  GW -->|"POST /auth · GET /auth/.well-known/*<br/>(rotas criadas no repo da Lambda)"| L
+  GW -->|"ANY /core · ANY /core/{proxy+}"| VPCL --> NLB --> Pods
+  CP --> NG --> Pods
+  NG -->|"SG: 5432"| RDS
+  VPC -.->|"remote state (subnets, SG do RDS)"| eks
 ```
+
+A rota `/core` é criada por **discovery**: o Terraform procura o NLB pela tag
+`kubernetes.io/service-name=tech-challenge/core`, que só existe depois do primeiro deploy do core.
 
 ## Stack
 
