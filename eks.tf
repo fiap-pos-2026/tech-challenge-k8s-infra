@@ -103,3 +103,21 @@ resource "aws_eks_node_group" "main" {
     Name = "${local.name_prefix}-nodes"
   }
 }
+
+# metrics-server: fonte de CPU/memória do HPA do core. O EKS não instala por padrão.
+# Add-on da própria AWS (community add-on) — não exige IAM Role, então funciona no Academy.
+resource "aws_eks_addon" "metrics_server" {
+  count = var.enable_metrics_server ? 1 : 0
+
+  cluster_name                = aws_eks_cluster.main.name
+  addon_name                  = "metrics-server"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  # Pods do add-on precisam de node para agendar
+  depends_on = [aws_eks_node_group.main]
+
+  tags = {
+    Name = "${local.name_prefix}-metrics-server"
+  }
+}

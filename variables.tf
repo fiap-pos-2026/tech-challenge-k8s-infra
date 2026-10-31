@@ -100,3 +100,9 @@ variable "core_nlb_listener_port" {
   type        = number
   default     = 8080
 }
+
+variable "enable_metrics_server" {
+  description = "Instala o add-on metrics-server (necessário para o HPA do core)"
+  type        = bool
+  default     = true
+}
