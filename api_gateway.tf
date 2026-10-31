@@ -130,7 +130,7 @@ data "aws_lb_listener" "core" {
 }
 
 locals {
-  core_listener_arn = var.core_nlb_listener_arn != "" ? var.core_nlb_listener_arn : try(data.aws_lb_listener.core[0].arn, "")
+  core_listener_arn  = var.core_nlb_listener_arn != "" ? var.core_nlb_listener_arn : try(data.aws_lb_listener.core[0].arn, "")
   core_route_enabled = local.core_listener_arn != ""
 }
 
