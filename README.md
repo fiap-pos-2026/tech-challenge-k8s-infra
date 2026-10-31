@@ -4,7 +4,7 @@ Terraform do cluster Kubernetes e da porta de entrada HTTP da oficina.
 
 O que sobe aqui:
 
-- Amazon EKS (control plane + node group)
+- Amazon EKS (control plane + node group) + add-on `metrics-server` (base do HPA do core)
 - Security groups (incluindo liberação dos nodes para o Postgres na 5432)
 - API Gateway HTTP API + VPC Link para `/core` (NLB interno do Service no EKS)
 - `/auth` fica no Terraform do auth-lambda (não preencha `auth_lambda_invoke_arn` aqui)
