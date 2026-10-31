@@ -15,6 +15,7 @@ locals {
   # Exige apply completo do db-infra (VPC + RDS). Apply parcial/antigo
   # falha com "Unsupported attribute" (ex.: sem public_subnet_ids).
   vpc_id             = local.db_outputs.vpc_id
+  vpc_cidr           = local.db_outputs.vpc_cidr
   private_subnet_ids = local.db_outputs.private_subnet_ids
   public_subnet_ids  = local.db_outputs.public_subnet_ids
   rds_sg_id          = local.db_outputs.rds_security_group_id

@@ -84,7 +84,19 @@ variable "auth_lambda_invoke_arn" {
 }
 
 variable "core_nlb_listener_arn" {
-  description = "ARN do listener NLB/ALB da aplicação core (VPC Link). Vazio = rota /core ainda sem integração."
+  description = "Override opcional do ARN do listener NLB do core. Vazio = discovery pela tag kubernetes.io/service-name=tech-challenge/core (após o Service LoadBalancer existir)."
   type        = string
   default     = ""
+}
+
+variable "core_k8s_service_name" {
+  description = "Tag kubernetes.io/service-name do Service que cria o NLB (namespace/name)."
+  type        = string
+  default     = "tech-challenge/core"
+}
+
+variable "core_nlb_listener_port" {
+  description = "Porta do listener TCP no NLB do core (Service port)."
+  type        = number
+  default     = 8080
 }

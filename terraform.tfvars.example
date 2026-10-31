@@ -17,6 +17,7 @@ node_desired_size   = 2
 node_min_size       = 1
 node_max_size       = 4
 
-# Preencher após o deploy do auth-lambda e do NLB da app:
-# auth_lambda_invoke_arn = "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:.../invocations"
-# core_nlb_listener_arn  = "arn:aws:elasticloadbalancing:..."
+# auth_lambda_invoke_arn: deixe vazio — /auth é criado pelo Terraform do auth-lambda.
+# core_nlb_listener_arn: deixe vazio para discovery automático (tag kubernetes.io/service-name=tech-challenge/core).
+# Override só se precisar forçar o ARN do listener TCP 8080:
+# core_nlb_listener_arn = "arn:aws:elasticloadbalancing:..."
