@@ -47,6 +47,8 @@ flowchart LR
 A rota `/core` é criada por **discovery**: o Terraform procura o NLB pela tag
 `kubernetes.io/service-name=tech-challenge/core`, que só existe depois do primeiro deploy do core.
 
+Decisões relacionadas: [ADR-002 — Gateway via VPC Link + NLB](https://github.com/fiap-pos-2026/tech-challenge-core/blob/main/docs/arquitetura/adr/ADR-002-gateway-vpc-link-nlb.md), [ADR-003 — HPA](https://github.com/fiap-pos-2026/tech-challenge-core/blob/main/docs/arquitetura/adr/ADR-003-hpa.md), [ADR-001 — quatro repositórios](https://github.com/fiap-pos-2026/tech-challenge-core/blob/main/docs/arquitetura/adr/ADR-001-quatro-repositorios.md). Índice completo em [`docs/arquitetura`](https://github.com/fiap-pos-2026/tech-challenge-core/blob/main/docs/arquitetura/README.md) no core.
+
 ## Stack
 
 | Item | Valor |
